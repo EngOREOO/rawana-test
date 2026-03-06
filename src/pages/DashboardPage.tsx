@@ -2,7 +2,15 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchSlidesThunk } from '../features/slides/slidesSlice';
-import { logoutThunk } from '../features/auth/authSlice';
+// import { logoutThunk } from '../features/auth/authSlice';
+
+
+const EditIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+);
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
@@ -24,65 +32,63 @@ export default function DashboardPage() {
     dispatch(fetchSlidesThunk({ page: nextPage, name: search.trim() || undefined }));
   };
 
-  const onLogout = async () => {
-    await dispatch(logoutThunk());
-    navigate('/login', { replace: true });
-  };
-
   return (
-    <div className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-6xl rounded-xl bg-white p-6 shadow">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold text-slate-800">Slides Dashboard</h1>
-          <button className="rounded-lg bg-slate-800 px-4 py-2 text-white" onClick={onLogout}>
-            Logout
-          </button>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] p-8">
+      <div className="mx-auto max-w-7xl">
+        <h1 className="text-[32px] font-bold text-[#28335B] mb-8">Slides</h1>
 
-        <form onSubmit={onSearch} className="mb-4 flex gap-2">
+      
+        <form onSubmit={onSearch} className="mb-10 rounded-2xl bg-[#F2F2F2] p-10 flex gap-6 items-center">
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by slide name"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="flex-1 rounded-lg border-none px-4 py-3 text-gray-700 shadow-sm focus:ring-2 focus:ring-[#DCA126]"
           />
-          <button className="rounded-lg bg-blue-600 px-4 py-2 text-white">Search</button>
+          <button className="rounded-lg bg-[#DCA126] px-16 py-3 font-semibold text-white transition-hover hover:bg-[#c58f21]">
+            Search
+          </button>
         </form>
 
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
+          
+          <table className="w-full border-separate border-spacing-x-4 border-spacing-y-3 text-left">
             <thead>
-              <tr className="bg-slate-50 text-left">
-                <th className="border border-slate-200 px-3 py-2">Slide Name</th>
-                <th className="border border-slate-200 px-3 py-2">Type</th>
-                <th className="border border-slate-200 px-3 py-2">Status</th>
-                <th className="border border-slate-200 px-3 py-2">Actions</th>
+              <tr className="text-white">
+                <th className="bg-[#28335B] rounded-lg px-6 py-3 font-semibold text-[18px]">slide Name</th>
+                <th className="bg-[#28335B] rounded-lg px-6 py-3 font-semibold text-[18px]">type</th>
+                <th className="bg-[#28335B] rounded-lg px-6 py-3 font-semibold text-[18px]">Status</th>
+                <th className="bg-[#28335B] rounded-lg px-6 py-3 font-semibold text-[18px]">Actions</th>
               </tr>
             </thead>
             <tbody>
               {items.map((slide) => (
                 <tr
                   key={slide.id}
-                  className="cursor-pointer hover:bg-slate-50"
+                  className="group cursor-pointer"
                   onClick={() => navigate(`/slides/${slide.id}`)}
                 >
-                  <td className="border border-slate-200 px-3 py-2">{slide.slideName}</td>
-                  <td className="border border-slate-200 px-3 py-2">{slide.type}</td>
-                  <td className="border border-slate-200 px-3 py-2">{slide.status}</td>
-                  <td className="border border-slate-200 px-3 py-2">
-                    <Link
-                      className="text-blue-600 hover:underline"
-                      to={`/slides/${slide.id}`}
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      Open Editor
-                    </Link>
+                
+                  <td className="bg-[#F1F1F1] rounded-lg px-6 py-4 text-[#7E7E7E] text-[16px] group-hover:bg-gray-200 transition-colors">
+                    {slide.slideName}
+                  </td>
+                  <td className="bg-[#F1F1F1] rounded-lg px-6 py-4 text-[#7E7E7E] text-[16px] group-hover:bg-gray-200 transition-colors">
+                    {slide.type}
+                  </td>
+                  <td className="bg-[#F1F1F1] rounded-lg px-6 py-4 text-[#7E7E7E] text-[16px] group-hover:bg-gray-200 transition-colors">
+                    {slide.status}
+                  </td>
+                  <td className="bg-[#F1F1F1] rounded-lg px-6 py-4 text-center group-hover:bg-gray-200 transition-colors">
+                    <div className="flex justify-center">
+                      <EditIcon />
+                    </div>
                   </td>
                 </tr>
               ))}
-              {!items.length && (
+              
+              {(!items || items.length === 0) && (
                 <tr>
-                  <td colSpan={4} className="border border-slate-200 px-3 py-6 text-center text-slate-500">
+                  <td colSpan={4} className="py-20 text-center text-gray-400 text-lg">
                     {status === 'loading' ? 'Loading slides...' : 'No slides found'}
                   </td>
                 </tr>
@@ -91,26 +97,35 @@ export default function DashboardPage() {
           </table>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
-          <p>
-            Page {page} of {totalPages} | Total: {totalCount}
-          </p>
-          <div className="flex gap-2">
-            <button
-              className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
-              onClick={() => onPage(Math.max(1, page - 1))}
-              disabled={page <= 1}
-            >
-              Previous
-            </button>
-            <button
-              className="rounded border border-slate-300 px-3 py-1 disabled:opacity-50"
-              onClick={() => onPage(Math.min(totalPages, page + 1))}
-              disabled={page >= totalPages}
-            >
-              Next
-            </button>
-          </div>
+
+        <div className="mt-8 flex items-center justify-end gap-2">
+           <button 
+             className="px-4 py-2 bg-[#E2E8F0] rounded text-[#28335B] disabled:opacity-50 cursor-pointer"
+             onClick={() => onPage(Math.max(1, page - 1))}
+             disabled={page <= 1}
+           >
+             Previous
+           </button>
+           
+           {[...Array(totalPages)].map((_, i) => (
+             <button
+               key={i}
+               onClick={() => onPage(i + 1)}
+               className={`w-10 h-10 rounded flex items-center justify-center font-bold ${
+                 page === i + 1 ? 'bg-[#28335B] text-white' : 'bg-[#E2E8F0] text-gray-600'
+               }`}
+             >
+               {i + 1}
+             </button>
+           ))}
+
+           <button 
+             className="px-4 py-2 bg-[#E2E8F0] rounded text-[#28335B] disabled:opacity-50 cursor-pointer"
+             onClick={() => onPage(Math.min(totalPages, page + 1))}
+             disabled={page >= totalPages}
+           >
+             Next
+           </button>
         </div>
       </div>
     </div>
