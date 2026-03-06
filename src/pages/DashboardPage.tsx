@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchSlidesThunk } from '../features/slides/slidesSlice';
 // import { logoutThunk } from '../features/auth/authSlice';
@@ -16,7 +16,7 @@ export default function DashboardPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { items, page, totalPages, totalCount, status } = useAppSelector((state) => state.slides);
+  const { items, page, totalPages, status } = useAppSelector((state) => state.slides);
   const [search, setSearch] = useState('');
 
   useEffect(() => {

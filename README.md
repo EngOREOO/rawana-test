@@ -40,7 +40,7 @@ cp .env.example .env
 Example value:
 
 ```env
-VITE_API_URL=https://control.html-builder.net
+VITE_API_URL=http://127.0.0.1:4000
 ```
 
 ## Run
@@ -92,6 +92,11 @@ VITE_API_URL=http://localhost:4000
 - `POST /api/save-slide-dummy/:slideId`
 - `POST /api/attach-media-to-slide/:slideId`
 - `GET /api/health`
+
+### Seeded Login Credentials
+
+- Email: `rawanakhalid64@gmail.com`
+- Password: `SecureP@ssw0rd123`
 
 ## Notes
 
