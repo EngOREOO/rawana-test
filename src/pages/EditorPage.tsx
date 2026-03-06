@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Editor } from '@tinymce/tinymce-react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchSlidesThunk } from '../features/slides/slidesSlice';
 import {
@@ -122,16 +121,10 @@ export default function EditorPage() {
           <div className="mb-4 rounded-lg border border-slate-200 p-3">
             <h3 className="mb-2 text-sm font-semibold text-slate-700">Text Panel (Rich Text)</h3>
             {selectedElement?.type === 'text' ? (
-              <Editor
+              <textarea
+                className="min-h-40 w-full rounded border border-slate-300 p-2 text-sm"
                 value={selectedElement.content}
-                onEditorChange={(content) => onUpdateSelected({ content })}
-                init={{
-                  menubar: false,
-                  statusbar: false,
-                  height: 160,
-                  plugins: ['lists', 'link', 'autolink'],
-                  toolbar: 'undo redo | bold italic underline | bullist numlist | link',
-                }}
+                onChange={(event) => onUpdateSelected({ content: event.target.value })}
               />
             ) : (
               <div className="min-h-20 rounded border border-slate-300 p-2 text-sm text-slate-500">

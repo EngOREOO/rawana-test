@@ -36,6 +36,9 @@ type InteractionState =
     }
   | null;
 
+const stripHtmlTags = (value: string): string =>
+  value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
 interface CanvasElementProps {
   element: SlideElement;
   isSelected: boolean;
@@ -73,7 +76,7 @@ const CanvasElement = memo(function CanvasElement({
             color: element.color ?? '#fff',
           }}
         >
-          {element.content}
+          {stripHtmlTags(element.content)}
         </div>
       ) : (
         <img src={element.src} alt={element.alt ?? 'element'} className="h-full w-full object-cover" />
