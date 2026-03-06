@@ -4,8 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "npm --prefix backend run dev",
-    "server:start": "npm --prefix backend run start",
+    "server": "concurrently -k -n BACKEND,FRONTEND -c cyan,green \"npm run server:backend\" \"npm run server:frontend\"",
+    "server:backend": "npm --prefix backend run start",
+    "server:frontend": "vite --host 127.0.0.1 --port 5173",
+    "server:start": "npm run server:backend",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
@@ -38,6 +40,7 @@
     "tailwindcss": "^3.3.0",
     "typescript": "^5.9.3",
     "vite": "^5.0.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "concurrently": "^9.2.1"
   }
 }
