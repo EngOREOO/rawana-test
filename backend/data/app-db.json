@@ -1,0 +1,56 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "Designer Demo",
+      "email": "rawanakhalid64@gmail.com",
+      "password": "SecureP@ssw0rd123"
+    }
+  ],
+  "slides": [
+    {
+      "id": "ea9be908-4c11-43df-9149-a0bbc1708a28",
+      "slideName": "Media Slide",
+      "type": "presentation",
+      "status": "published",
+      "rank": 1,
+      "thumbnail": "https://picsum.photos/seed/slide1/640/360",
+      "background": "https://picsum.photos/seed/bg1/1200/700",
+      "html": "",
+      "elements": [],
+      "media": [
+        {
+          "id": "ea9be908-media-1",
+          "type": "image",
+          "name": "media name",
+          "url": "https://picsum.photos/seed/media1/800/450",
+          "thumbnail": "https://picsum.photos/seed/media1/320/180"
+        }
+      ],
+      "screenshot": null,
+      "updatedAt": "2026-03-06T05:30:31.808Z"
+    },
+    {
+      "id": "37741911-f9bf-4dfa-8335-1e0b4c9793e3",
+      "slideName": "Save Slide Dummy",
+      "type": "presentation",
+      "status": "draft",
+      "rank": 2,
+      "thumbnail": "https://picsum.photos/seed/slide2/640/360",
+      "background": "https://picsum.photos/seed/bg2/1200/700",
+      "html": "",
+      "elements": [],
+      "media": [
+        {
+          "id": "37741911-media-1",
+          "type": "image",
+          "name": "second media",
+          "url": "https://picsum.photos/seed/media2/800/450",
+          "thumbnail": "https://picsum.photos/seed/media2/320/180"
+        }
+      ],
+      "screenshot": null,
+      "updatedAt": "2026-03-06T23:18:34.563Z"
+    }
+  ]
+}

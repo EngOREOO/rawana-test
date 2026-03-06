@@ -9,7 +9,8 @@ import crypto from 'node:crypto';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, 'data');
-const DB_PATH = path.join(DATA_DIR, 'db.json');
+const POSTMAN_COLLECTION_PATH = path.join(DATA_DIR, 'db.json');
+const APP_DB_PATH = path.join(DATA_DIR, 'app-db.json');
 const PORT = Number(process.env.PORT || 4000);
 const HOST = process.env.HOST || '127.0.0.1';
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || '*';
@@ -32,8 +33,8 @@ const defaultDb = {
   ],
   slides: [
     {
-      id: '1',
-      slideName: 'Welcome Slide',
+      id: 'ea9be908-4c11-43df-9149-a0bbc1708a28',
+      slideName: 'Media Slide',
       type: 'presentation',
       status: 'published',
       rank: 1,
@@ -57,9 +58,9 @@ const defaultDb = {
       ],
       media: [
         {
-          id: 'm-1',
+          id: 'ea9be908-media-1',
           type: 'image',
-          name: 'Cover image',
+          name: 'media name',
           url: 'https://picsum.photos/seed/media1/800/450',
           thumbnail: 'https://picsum.photos/seed/media1/320/180',
         },
@@ -68,20 +69,40 @@ const defaultDb = {
       updatedAt: new Date().toISOString(),
     },
     {
-      id: '2',
-      slideName: 'Product Highlights',
+      id: '37741911-f9bf-4dfa-8335-1e0b4c9793e3',
+      slideName: 'Save Slide Dummy',
       type: 'presentation',
       status: 'draft',
       rank: 2,
       thumbnail: 'https://picsum.photos/seed/slide2/640/360',
       background: 'https://picsum.photos/seed/bg2/1200/700',
       html: '',
-      elements: [],
+      elements: [
+        {
+          id: '37741911-element-1',
+          type: 'text',
+          x: 198,
+          y: 152,
+          width: 270,
+          height: 204,
+          zIndex: 2,
+          content: '<p>type here</p>',
+        },
+        {
+          id: '37741911-element-2',
+          type: 'image',
+          x: 99,
+          y: 100,
+          width: 428,
+          height: 254,
+          zIndex: 2,
+        },
+      ],
       media: [
         {
-          id: 'm-2',
+          id: '37741911-media-1',
           type: 'image',
-          name: 'Product shot',
+          name: 'second media',
           url: 'https://picsum.photos/seed/media2/800/450',
           thumbnail: 'https://picsum.photos/seed/media2/320/180',
         },
@@ -98,19 +119,36 @@ const ensureDb = () => {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
-  if (!fs.existsSync(DB_PATH)) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(defaultDb, null, 2));
+  if (!fs.existsSync(APP_DB_PATH)) {
+    fs.writeFileSync(APP_DB_PATH, JSON.stringify(defaultDb, null, 2));
+  }
+  if (!fs.existsSync(POSTMAN_COLLECTION_PATH)) {
+    fs.writeFileSync(
+      POSTMAN_COLLECTION_PATH,
+      JSON.stringify(
+        {
+          info: {
+            _postman_id: '17f0c5d5-9b35-443f-a86e-6dd4addc59c2',
+            name: 'Front Task Copy',
+            schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+          },
+          item: [],
+        },
+        null,
+        2,
+      ),
+    );
   }
 };
 
 const readDb = () => {
   ensureDb();
-  const raw = fs.readFileSync(DB_PATH, 'utf-8');
+  const raw = fs.readFileSync(APP_DB_PATH, 'utf-8');
   return JSON.parse(raw);
 };
 
 const writeDb = (nextDb) => {
-  fs.writeFileSync(DB_PATH, JSON.stringify(nextDb, null, 2));
+  fs.writeFileSync(APP_DB_PATH, JSON.stringify(nextDb, null, 2));
 };
 
 const safeSlide = (slide) => ({

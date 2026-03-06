@@ -1,74 +1,393 @@
 {
-  "users": [
+  "info": {
+    "_postman_id": "17f0c5d5-9b35-443f-a86e-6dd4addc59c2",
+    "name": "Front Task Copy",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37625414",
+    "_collection_link": "https://go.postman.co/collection/37625414-17f0c5d5-9b35-443f-a86e-6dd4addc59c2?source=collection_link"
+  },
+  "item": [
     {
-      "id": "u1",
-      "name": "Designer Demo",
-      "email": "rawanakhalid64@gmail.com",
-      "password": "SecureP@ssw0rd123"
-    }
-  ],
-  "slides": [
-    {
-      "id": "1",
-      "slideName": "Welcome Slide",
-      "type": "presentation",
-      "status": "published",
-      "rank": 1,
-      "thumbnail": "https://picsum.photos/seed/slide1/640/360",
-      "background": "https://picsum.photos/seed/bg1/1200/700",
-      "html": "",
-      "elements": [],
-      "media": [
+      "name": "Authentication",
+      "item": [
         {
-          "id": "m-1",
-          "type": "image",
-          "name": "Cover image",
-          "url": "https://picsum.photos/seed/media1/800/450",
-          "thumbnail": "https://picsum.photos/seed/media1/320/180"
-        }
-      ],
-      "screenshot": null,
-      "updatedAt": "2026-03-06T05:30:31.808Z"
-    },
-    {
-      "id": "2",
-      "slideName": "Product Highlights",
-      "type": "presentation",
-      "status": "draft",
-      "rank": 2,
-      "thumbnail": "https://picsum.photos/seed/slide2/640/360",
-      "background": "https://picsum.photos/seed/bg2/1200/700",
-      "html": "",
-      "elements": [
-        {
-          "id": "GkcCQ3SkXIvXphYlm1YTs",
-          "x": 198,
-          "y": 152,
-          "width": 270,
-          "height": 204,
-          "zIndex": 2,
-          "content": "<p>type here</p>"
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "default"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "default"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "",
+                  "type": "default"
+                },
+                {
+                  "key": "password",
+                  "value": "",
+                  "type": "default"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/api/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": null,
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
         },
         {
-          "id": "fkr79UJKfeYvi0ROFeIZp",
-          "x": 99,
-          "y": 100,
-          "width": 428,
-          "height": 254,
-          "zIndex": 2
-        }
-      ],
-      "media": [
+          "name": "logout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "default"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/api/logout",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "id": "m-2",
-          "type": "image",
-          "name": "Product shot",
-          "url": "https://picsum.photos/seed/media2/800/450",
-          "thumbnail": "https://picsum.photos/seed/media2/320/180"
+          "name": "Get-user-data",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "default"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "default"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/api/user-data",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "user-data"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Slides",
+      "item": [
+        {
+          "name": "slides-of-designer",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/api/slides-of-designer",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "slides-of-designer"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "name",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "per_page",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "attach-media-to-slide",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "medias[0][media]",
+                  "type": "file",
+                  "src": "/C:/Users/ahmed.tawfieck/Desktop/click2.png"
+                },
+                {
+                  "key": "medias[0][type]",
+                  "value": "image",
+                  "type": "text"
+                },
+                {
+                  "key": "medias[0][name]",
+                  "value": "media name",
+                  "type": "text",
+                  "uuid": "a6ddf1d7-34a7-461c-a9c1-a33ed6ba6ffb"
+                },
+                {
+                  "key": "medias[1][media]",
+                  "type": "file",
+                  "uuid": "3aa91596-b9fb-4302-b176-8df4f70ea4fe",
+                  "src": "/C:/Users/ahmed.tawfieck/Desktop/85414.png"
+                },
+                {
+                  "key": "medias[1][type]",
+                  "value": "image",
+                  "type": "text",
+                  "uuid": "f18e8753-72c7-4aa7-8d42-e05ec7c3ca09"
+                },
+                {
+                  "key": "medias[1][name]",
+                  "value": "second media",
+                  "type": "text",
+                  "uuid": "a5c694f7-163a-483c-bb53-e993bec1fea0"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{url}}/api/attach-media-to-slide/ea9be908-4c11-43df-9149-a0bbc1708a28",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "attach-media-to-slide",
+                "ea9be908-4c11-43df-9149-a0bbc1708a28"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "media-of-slides",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/api/media-of-slide/ea9be908-4c11-43df-9149-a0bbc1708a28",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "media-of-slide",
+                "ea9be908-4c11-43df-9149-a0bbc1708a28"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "save-slide-dummy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/api/save-slide-dummy/37741911-f9bf-4dfa-8335-1e0b4c9793e3",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "api",
+                "save-slide-dummy",
+                "37741911-f9bf-4dfa-8335-1e0b4c9793e3"
+              ]
+            }
+          },
+          "response": []
         }
       ],
-      "screenshot": null,
-      "updatedAt": "2026-03-06T21:29:12.820Z"
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
     }
   ]
 }
