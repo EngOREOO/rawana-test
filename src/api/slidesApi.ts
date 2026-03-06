@@ -71,11 +71,12 @@ export const logoutRequest = async () => {
   await apiClient.post('/api/logout');
 };
 
-export const fetchSlidesRequest = async (params: { page?: number; name?: string }): Promise<SlidesResponse> => {
+export const fetchSlidesRequest = async (params: { page?: number; name?: string; perPage?: number }): Promise<SlidesResponse> => {
   const response = await apiClient.get('/api/slides-of-designer', {
     params: {
       page: params.page,
       name: params.name || undefined,
+      per_page: params.perPage ?? 10,
     },
   });
 
@@ -109,7 +110,7 @@ export const fetchSlideByIdRequest = async (id: string): Promise<SlideDetail> =>
     };
   } catch {
     const fallback = await fetchSlidesRequest({ page: 1 });
-    const matched = fallback.items.find((slide) => slide.id === id) ?? fallback.items[0];
+    const matched = fallback.items.find((slide) => slide.id === id);
     return {
       ...(matched ?? {
         id,
@@ -163,5 +164,12 @@ export const saveSlideLayoutRequest = async (payload: {
     html: payload.html,
     screenshot: payload.screenshot,
     elements: payload.elements,
+  });
+};
+
+export const syncSlideElementsRequest = async (slideId: string, elements: SlideElement[]) => {
+  await apiClient.post(`/api/save-slide-dummy/${slideId}`, {
+    mode: 'sync_elements',
+    elements,
   });
 };

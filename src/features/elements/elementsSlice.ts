@@ -1,16 +1,18 @@
 import { PayloadAction, createEntityAdapter, createSlice, nanoid } from '@reduxjs/toolkit';
 import type { RootState } from '../../app/store';
 import type { ImageElement, SlideElement, TextElement } from '../../types/models';
-import { fetchSlideByIdThunk } from '../currentSlide/currentSlideSlice';
+import { fetchSlideByIdThunk, saveSlideLayoutThunk } from '../currentSlide/currentSlideSlice';
 
 const elementsAdapter = createEntityAdapter<SlideElement>();
 
 interface ElementsState {
   selectedId: string | null;
+  dirty: boolean;
 }
 
 const initialState = elementsAdapter.getInitialState<ElementsState>({
   selectedId: null,
+  dirty: false,
 });
 
 const createDefaultTextElement = (): TextElement => ({
@@ -47,15 +49,18 @@ const elementsSlice = createSlice({
       const element = createDefaultTextElement();
       elementsAdapter.addOne(state, element);
       state.selectedId = element.id;
+      state.dirty = true;
     },
     addImageElement: (state, action: PayloadAction<{ src: string }>) => {
       const element = createDefaultImageElement(action.payload.src);
       elementsAdapter.addOne(state, element);
       state.selectedId = element.id;
+      state.dirty = true;
     },
     setElements: (state, action: PayloadAction<SlideElement[]>) => {
       elementsAdapter.setAll(state, action.payload);
       state.selectedId = action.payload[0]?.id ?? null;
+      state.dirty = false;
     },
     selectElement: (state, action: PayloadAction<string | null>) => {
       state.selectedId = action.payload;
@@ -68,22 +73,29 @@ const elementsSlice = createSlice({
         id: action.payload.id,
         changes: action.payload.changes,
       });
+      state.dirty = true;
     },
     deleteElement: (state, action: PayloadAction<string>) => {
       elementsAdapter.removeOne(state, action.payload);
       if (state.selectedId === action.payload) {
         state.selectedId = null;
       }
+      state.dirty = true;
     },
     pasteElement: (state, action: PayloadAction<SlideElement>) => {
       elementsAdapter.addOne(state, action.payload);
       state.selectedId = action.payload.id;
+      state.dirty = true;
     },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchSlideByIdThunk.fulfilled, (state, action) => {
       elementsAdapter.setAll(state, action.payload.elements ?? []);
       state.selectedId = action.payload.elements?.[0]?.id ?? null;
+      state.dirty = false;
+    });
+    builder.addCase(saveSlideLayoutThunk.fulfilled, (state) => {
+      state.dirty = false;
     });
   },
 });

@@ -33,7 +33,11 @@ export const loginThunk = createAsyncThunk<
     dispatch(addToast({ type: 'success', message: 'Login successful' }));
     return { token: response.token, user: response.user };
   } catch (error) {
-    return rejectWithValue(extractErrorMessage(error));
+    const message = extractErrorMessage(error);
+    if (message.toLowerCase().includes('credential') || message.toLowerCase().includes('unauth')) {
+      return rejectWithValue('Invalid credentials');
+    }
+    return rejectWithValue('Invalid credentials');
   }
 });
 

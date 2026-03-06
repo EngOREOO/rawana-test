@@ -61,12 +61,20 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {items.map((slide) => (
-                <tr key={slide.id}>
+                <tr
+                  key={slide.id}
+                  className="cursor-pointer hover:bg-slate-50"
+                  onClick={() => navigate(`/slides/${slide.id}`)}
+                >
                   <td className="border border-slate-200 px-3 py-2">{slide.slideName}</td>
                   <td className="border border-slate-200 px-3 py-2">{slide.type}</td>
                   <td className="border border-slate-200 px-3 py-2">{slide.status}</td>
                   <td className="border border-slate-200 px-3 py-2">
-                    <Link className="text-blue-600 hover:underline" to={`/slides/${slide.id}`}>
+                    <Link
+                      className="text-blue-600 hover:underline"
+                      to={`/slides/${slide.id}`}
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       Open Editor
                     </Link>
                   </td>

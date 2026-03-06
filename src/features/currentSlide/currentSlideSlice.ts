@@ -4,6 +4,7 @@ import {
   fetchMultimediaRequest,
   fetchSlideByIdRequest,
   saveSlideLayoutRequest,
+  syncSlideElementsRequest,
   updateSlideElementRequest,
 } from '../../api/slidesApi';
 import type { MediaItem, SlideDetail, SlideElement } from '../../types/models';
@@ -84,6 +85,20 @@ export const saveSlideLayoutThunk = createAsyncThunk<
     const message = extractErrorMessage(error);
     dispatch(addToast({ type: 'error', message }));
     return rejectWithValue(message);
+  }
+});
+
+export const syncSlideElementsThunk = createAsyncThunk<
+  void,
+  { slideId: string },
+  { state: RootState; rejectValue: string }
+>('currentSlide/syncElements', async ({ slideId }, { getState, rejectWithValue }) => {
+  try {
+    const state = getState();
+    const elements = Object.values(state.elements.entities).filter(Boolean) as SlideElement[];
+    await syncSlideElementsRequest(slideId, elements);
+  } catch (error) {
+    return rejectWithValue(extractErrorMessage(error));
   }
 });
 

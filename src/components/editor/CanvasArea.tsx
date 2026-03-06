@@ -9,7 +9,7 @@ import {
   updateElementLocal,
 } from '../../features/elements/elementsSlice';
 import { copyElement } from '../../features/clipboard/clipboardSlice';
-import { updateSlideElementThunk } from '../../features/currentSlide/currentSlideSlice';
+import { syncSlideElementsThunk, updateSlideElementThunk } from '../../features/currentSlide/currentSlideSlice';
 import type { SlideElement } from '../../types/models';
 
 interface Props {
@@ -150,17 +150,23 @@ export default function CanvasArea({ slideId, canvasRef }: Props) {
     const pasted = {
       ...clipboard,
       id: nanoid(),
-      x: clipboard.x + 24,
-      y: clipboard.y + 24,
+      x: clipboard.x + 20,
+      y: clipboard.y + 20,
       zIndex: Math.max(1, ...elements.map((item) => item.zIndex)) + 1,
     };
     dispatch(pasteElement(pasted));
+    if (slideId) {
+      dispatch(syncSlideElementsThunk({ slideId }));
+    }
     setContextMenu(null);
   };
 
   const onDelete = () => {
     if (!contextMenu) return;
     dispatch(deleteElement(contextMenu.elementId));
+    if (slideId) {
+      dispatch(syncSlideElementsThunk({ slideId }));
+    }
     setContextMenu(null);
   };
 

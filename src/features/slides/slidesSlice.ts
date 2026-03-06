@@ -26,7 +26,7 @@ const initialState: SlidesState = {
 
 export const fetchSlidesThunk = createAsyncThunk<
   { items: Slide[]; page: number; totalPages: number; totalCount: number },
-  { page?: number; name?: string },
+  { page?: number; name?: string; perPage?: number },
   { rejectValue: string }
 >('slides/fetchSlides', async (params, { rejectWithValue, dispatch }) => {
   try {

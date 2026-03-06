@@ -20,7 +20,14 @@ export default function App() {
             </PublicOnlyRoute>
           }
         />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicOnlyRoute>
+              <ResetPasswordPage />
+            </PublicOnlyRoute>
+          }
+        />
         <Route
           path="/"
           element={

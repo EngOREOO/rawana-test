@@ -18,6 +18,19 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      if (window.location.pathname !== '/login') {
+        window.location.replace('/login');
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 export const extractErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     const maybeMessage =
