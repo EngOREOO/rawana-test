@@ -1,22 +1,6 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/;
-
-const validatePassword = (password: string): string[] => {
-  const errors: string[] = [];
-
-  if (!password) errors.push('Password is required.');
-  if (password && password.length < 8) errors.push('Password must be at least 8 characters long.');
-  if (password.length > 64) errors.push('Password cannot exceed 64 characters.');
-  if (password && !/[A-Z]/.test(password)) errors.push('Password must contain at least one uppercase letter.');
-  if (password && !/[a-z]/.test(password)) errors.push('Password must contain at least one lowercase letter.');
-  if (password && !/[0-9]/.test(password)) errors.push('Password must contain at least one number.');
-  if (password && !SPECIAL_CHAR_REGEX.test(password))
-    errors.push('Password must contain at least one special character.');
-
-  return errors;
-};
+import { validateResetConfirmPassword, validateResetPassword } from '../shared/utils/validation';
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
@@ -24,13 +8,11 @@ export default function ResetPasswordPage() {
   const [submitted, setSubmitted] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const passwordErrors = useMemo(() => (submitted ? validatePassword(password) : []), [password, submitted]);
+  const passwordErrors = useMemo(() => (submitted ? validateResetPassword(password) : []), [password, submitted]);
 
   const confirmError = useMemo(() => {
     if (!submitted) return '';
-    if (!confirmPassword) return 'Confirmation Password is required.';
-    if (confirmPassword !== password) return 'Passwords do not match.';
-    return '';
+    return validateResetConfirmPassword(password, confirmPassword);
   }, [confirmPassword, password, submitted]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {

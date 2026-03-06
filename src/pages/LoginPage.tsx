@@ -2,8 +2,7 @@ import { FormEvent, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { loginThunk } from '../features/auth/authSlice';
-
-const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+import { validateLoginEmail, validateLoginPassword } from '../shared/utils/validation';
 
 export default function LoginPage() {
   const dispatch = useAppDispatch();
@@ -19,18 +18,12 @@ export default function LoginPage() {
 
   const emailError = useMemo(() => {
     if (!submitted) return '';
-    if (!email) return 'Email is required.';
-    if (email.length > 255) return 'Email cannot exceed 255 characters.';
-    if (!isValidEmail(email)) return 'Email format is invalid.';
-    return '';
+    return validateLoginEmail(email);
   }, [email, submitted]);
 
   const passwordError = useMemo(() => {
     if (!submitted) return '';
-    if (!password) return 'Password is required.';
-    if (password.length < 8) return 'Password must be at least 8 characters.';
-    if (password.length > 255) return 'Password cannot exceed 255 characters.';
-    return '';
+    return validateLoginPassword(password);
   }, [password, submitted]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {

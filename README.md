@@ -56,6 +56,43 @@ npm run dev
 npm run build
 ```
 
+## Local Backend (Node.js)
+
+A Node.js backend that matches the frontend endpoint contract is available in `backend/`.
+
+### Backend setup
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Backend default URL:
+
+```text
+http://localhost:4000
+```
+
+Use this in frontend `.env`:
+
+```env
+VITE_API_URL=http://localhost:4000
+```
+
+### Implemented backend endpoints
+
+- `POST /api/login`
+- `POST /api/logout`
+- `GET /api/user-data`
+- `GET /api/slides-of-designer?name=&page=&per_page=`
+- `GET /api/slides/:id`
+- `GET /api/media-of-slide/:slideId`
+- `POST /api/save-slide-dummy/:slideId`
+- `POST /api/attach-media-to-slide/:slideId`
+- `GET /api/health`
+
 ## Notes
 
 - API payloads are normalized defensively because backend response shapes can vary.

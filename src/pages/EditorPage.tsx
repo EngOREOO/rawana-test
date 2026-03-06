@@ -1,6 +1,6 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import html2canvas from 'html2canvas';
+import { Editor } from '@tinymce/tinymce-react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchSlidesThunk } from '../features/slides/slidesSlice';
 import {
@@ -13,11 +13,13 @@ import CanvasArea from '../components/editor/CanvasArea';
 import {
   addImageElement,
   addTextElement,
-  elementsSelectors,
   selectElement,
   updateElementLocal,
 } from '../features/elements/elementsSlice';
 import type { SlideElement } from '../types/models';
+import { selectSelectedElement } from '../features/elements/selectors';
+import { serializeCanvasHtml } from '../shared/utils/htmlSerializer';
+import { captureNodeScreenshot } from '../shared/utils/screenshot';
 
 export default function EditorPage() {
   const { id = '' } = useParams();
@@ -28,14 +30,7 @@ export default function EditorPage() {
   const slide = useAppSelector((state) => state.currentSlide.slide);
   const media = useAppSelector((state) => state.currentSlide.media);
   const slides = useAppSelector((state) => state.slides.items);
-  const selectedId = useAppSelector((state) => state.elements.selectedId);
-  const elements = useAppSelector(elementsSelectors.selectAll);
-
-  const selectedElement = useMemo(
-    () => elements.find((element) => element.id === selectedId) ?? null,
-    [elements, selectedId],
-  );
-
+  const selectedElement = useAppSelector(selectSelectedElement);
   const [rightSearch, setRightSearch] = useState('');
 
   useEffect(() => {
@@ -53,9 +48,8 @@ export default function EditorPage() {
       return;
     }
 
-    const html = canvasRef.current.innerHTML;
-    const shot = await html2canvas(canvasRef.current);
-    const screenshot = shot.toDataURL('image/png');
+    const html = serializeCanvasHtml(canvasRef.current);
+    const screenshot = await captureNodeScreenshot(canvasRef.current);
 
     await dispatch(
       saveSlideLayoutThunk({
@@ -127,30 +121,23 @@ export default function EditorPage() {
 
           <div className="mb-4 rounded-lg border border-slate-200 p-3">
             <h3 className="mb-2 text-sm font-semibold text-slate-700">Text Panel (Rich Text)</h3>
-            <div className="mb-2 flex flex-wrap gap-1">
-              {['bold', 'italic', 'underline'].map((command) => (
-                <button
-                  key={command}
-                  type="button"
-                  className="rounded border border-slate-300 px-2 py-1 text-xs"
-                  onClick={() => document.execCommand(command)}
-                >
-                  {command}
-                </button>
-              ))}
-            </div>
-            <div
-              className="min-h-20 rounded border border-slate-300 p-2 text-sm"
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={(event) => {
-                if (selectedElement?.type === 'text') {
-                  onUpdateSelected({ content: event.currentTarget.innerText });
-                }
-              }}
-            >
-              {selectedElement?.type === 'text' ? selectedElement.content : 'Select a text element'}
-            </div>
+            {selectedElement?.type === 'text' ? (
+              <Editor
+                value={selectedElement.content}
+                onEditorChange={(content) => onUpdateSelected({ content })}
+                init={{
+                  menubar: false,
+                  statusbar: false,
+                  height: 160,
+                  plugins: ['lists', 'link', 'autolink'],
+                  toolbar: 'undo redo | bold italic underline | bullist numlist | link',
+                }}
+              />
+            ) : (
+              <div className="min-h-20 rounded border border-slate-300 p-2 text-sm text-slate-500">
+                Select a text element
+              </div>
+            )}
           </div>
 
           <div className="mb-4 rounded-lg border border-slate-200 p-3">

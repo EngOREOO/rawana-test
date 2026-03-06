@@ -3,6 +3,7 @@ import { extractErrorMessage } from '../../api/client';
 import { loginRequest, logoutRequest } from '../../api/slidesApi';
 import type { RootState } from '../../app/store';
 import { addToast } from '../ui/uiSlice';
+import { handleApiError } from '../../shared/utils/handleApiError';
 
 interface AuthState {
   token: string | null;
@@ -34,6 +35,7 @@ export const loginThunk = createAsyncThunk<
     return { token: response.token, user: response.user };
   } catch (error) {
     const message = extractErrorMessage(error);
+    handleApiError(dispatch, error);
     if (message.toLowerCase().includes('credential') || message.toLowerCase().includes('unauth')) {
       return rejectWithValue('Invalid credentials');
     }

@@ -1,0 +1,56 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "Designer Demo",
+      "email": "designer@example.com",
+      "password": "Password@123"
+    }
+  ],
+  "slides": [
+    {
+      "id": "1",
+      "slideName": "Welcome Slide",
+      "type": "presentation",
+      "status": "published",
+      "rank": 1,
+      "thumbnail": "https://picsum.photos/seed/slide1/640/360",
+      "background": "https://picsum.photos/seed/bg1/1200/700",
+      "html": "",
+      "elements": [],
+      "media": [
+        {
+          "id": "m-1",
+          "type": "image",
+          "name": "Cover image",
+          "url": "https://picsum.photos/seed/media1/800/450",
+          "thumbnail": "https://picsum.photos/seed/media1/320/180"
+        }
+      ],
+      "screenshot": null,
+      "updatedAt": "2026-03-06T05:30:31.808Z"
+    },
+    {
+      "id": "2",
+      "slideName": "Product Highlights",
+      "type": "presentation",
+      "status": "draft",
+      "rank": 2,
+      "thumbnail": "https://picsum.photos/seed/slide2/640/360",
+      "background": "https://picsum.photos/seed/bg2/1200/700",
+      "html": "",
+      "elements": [],
+      "media": [
+        {
+          "id": "m-2",
+          "type": "image",
+          "name": "Product shot",
+          "url": "https://picsum.photos/seed/media2/800/450",
+          "thumbnail": "https://picsum.photos/seed/media2/320/180"
+        }
+      ],
+      "screenshot": null,
+      "updatedAt": "2026-03-06T00:00:00.000Z"
+    }
+  ]
+}

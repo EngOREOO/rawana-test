@@ -10,6 +10,7 @@ import {
 import type { MediaItem, SlideDetail, SlideElement } from '../../types/models';
 import type { RootState } from '../../app/store';
 import { addToast } from '../ui/uiSlice';
+import { handleApiError } from '../../shared/utils/handleApiError';
 
 interface CurrentSlideState {
   slide: SlideDetail | null;
@@ -31,22 +32,22 @@ const initialState: CurrentSlideState = {
 
 export const fetchSlideByIdThunk = createAsyncThunk<SlideDetail, string, { rejectValue: string }>(
   'currentSlide/fetchById',
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, dispatch }) => {
     try {
       return await fetchSlideByIdRequest(id);
     } catch (error) {
-      return rejectWithValue(extractErrorMessage(error));
+      return rejectWithValue(handleApiError(dispatch, error));
     }
   },
 );
 
 export const fetchMultimediaThunk = createAsyncThunk<MediaItem[], { slideId: string; type: string }, { rejectValue: string }>(
   'currentSlide/fetchMultimedia',
-  async (payload, { rejectWithValue }) => {
+  async (payload, { rejectWithValue, dispatch }) => {
     try {
       return await fetchMultimediaRequest(payload.slideId, payload.type);
     } catch (error) {
-      return rejectWithValue(extractErrorMessage(error));
+      return rejectWithValue(handleApiError(dispatch, error));
     }
   },
 );
@@ -55,12 +56,12 @@ export const updateSlideElementThunk = createAsyncThunk<
   { elementId: string; updates: Partial<SlideElement> },
   { slideId: string; elementId: string; updates: Partial<SlideElement> },
   { rejectValue: string }
->('currentSlide/updateElement', async (payload, { rejectWithValue }) => {
+>('currentSlide/updateElement', async (payload, { rejectWithValue, dispatch }) => {
   try {
     await updateSlideElementRequest(payload.slideId, payload.elementId, payload.updates);
     return { elementId: payload.elementId, updates: payload.updates };
   } catch (error) {
-    return rejectWithValue(extractErrorMessage(error));
+    return rejectWithValue(handleApiError(dispatch, error));
   }
 });
 
@@ -92,13 +93,13 @@ export const syncSlideElementsThunk = createAsyncThunk<
   void,
   { slideId: string },
   { state: RootState; rejectValue: string }
->('currentSlide/syncElements', async ({ slideId }, { getState, rejectWithValue }) => {
+>('currentSlide/syncElements', async ({ slideId }, { getState, rejectWithValue, dispatch }) => {
   try {
     const state = getState();
     const elements = Object.values(state.elements.entities).filter(Boolean) as SlideElement[];
     await syncSlideElementsRequest(slideId, elements);
   } catch (error) {
-    return rejectWithValue(extractErrorMessage(error));
+    return rejectWithValue(handleApiError(dispatch, error));
   }
 });
 

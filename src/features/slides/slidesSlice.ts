@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { fetchSlidesRequest } from '../../api/slidesApi';
-import { extractErrorMessage } from '../../api/client';
 import type { Slide } from '../../types/models';
-import { addToast } from '../ui/uiSlice';
+import { handleApiError } from '../../shared/utils/handleApiError';
 
 interface SlidesState {
   items: Slide[];
@@ -32,8 +31,7 @@ export const fetchSlidesThunk = createAsyncThunk<
   try {
     return await fetchSlidesRequest(params);
   } catch (error) {
-    const message = extractErrorMessage(error);
-    dispatch(addToast({ type: 'error', message }));
+    const message = handleApiError(dispatch, error);
     return rejectWithValue(message);
   }
 });

@@ -1,9 +1,8 @@
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, memo, useEffect, useState } from 'react';
 import { nanoid } from '@reduxjs/toolkit';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   deleteElement,
-  elementsSelectors,
   pasteElement,
   selectElement,
   updateElementLocal,
@@ -11,6 +10,7 @@ import {
 import { copyElement } from '../../features/clipboard/clipboardSlice';
 import { syncSlideElementsThunk, updateSlideElementThunk } from '../../features/currentSlide/currentSlideSlice';
 import type { SlideElement } from '../../types/models';
+import { selectElementsSortedByZIndex } from '../../features/elements/selectors';
 
 interface Props {
   slideId: string;
@@ -36,9 +36,61 @@ type InteractionState =
     }
   | null;
 
+interface CanvasElementProps {
+  element: SlideElement;
+  isSelected: boolean;
+  onMouseDown: (event: MouseEvent<HTMLDivElement>, element: SlideElement) => void;
+  onContextMenu: (event: MouseEvent<HTMLDivElement>, elementId: string) => void;
+  onResizeMouseDown: (event: MouseEvent<HTMLDivElement>, element: SlideElement) => void;
+}
+
+const CanvasElement = memo(function CanvasElement({
+  element,
+  isSelected,
+  onMouseDown,
+  onContextMenu,
+  onResizeMouseDown,
+}: CanvasElementProps) {
+  return (
+    <div
+      className={`absolute cursor-move select-none ${isSelected ? 'ring-2 ring-yellow-300' : ''}`}
+      style={{
+        left: element.x,
+        top: element.y,
+        width: element.width,
+        height: element.height,
+        zIndex: element.zIndex,
+      }}
+      onMouseDown={(event) => onMouseDown(event, element)}
+      onContextMenu={(event) => onContextMenu(event, element.id)}
+    >
+      {element.type === 'text' ? (
+        <div
+          className="h-full w-full overflow-hidden break-words text-white"
+          style={{
+            fontSize: element.fontSize ?? 42,
+            fontWeight: element.fontWeight ?? 600,
+            color: element.color ?? '#fff',
+          }}
+        >
+          {element.content}
+        </div>
+      ) : (
+        <img src={element.src} alt={element.alt ?? 'element'} className="h-full w-full object-cover" />
+      )}
+
+      <div
+        data-handle="resize"
+        className="absolute -bottom-1 -right-1 h-3 w-3 cursor-se-resize rounded-sm bg-white ring-1 ring-slate-800"
+        onMouseDown={(event) => onResizeMouseDown(event, element)}
+      />
+    </div>
+  );
+});
+
 export default function CanvasArea({ slideId, canvasRef }: Props) {
   const dispatch = useAppDispatch();
-  const elements = useAppSelector(elementsSelectors.selectAll);
+  const elements = useAppSelector(selectElementsSortedByZIndex);
   const selectedId = useAppSelector((state) => state.elements.selectedId);
   const clipboard = useAppSelector((state) => state.clipboard.element);
   const slide = useAppSelector((state) => state.currentSlide.slide);
@@ -183,45 +235,16 @@ export default function CanvasArea({ slideId, canvasRef }: Props) {
           <div className="absolute inset-0 bg-gradient-to-br from-[#0f2b56] via-[#1b4d96] to-[#12355e]" />
         )}
 
-        {elements
-          .slice()
-          .sort((a, b) => a.zIndex - b.zIndex)
-          .map((element) => (
-            <div
-              key={element.id}
-              className={`absolute cursor-move select-none ${selectedId === element.id ? 'ring-2 ring-yellow-300' : ''}`}
-              style={{
-                left: element.x,
-                top: element.y,
-                width: element.width,
-                height: element.height,
-                zIndex: element.zIndex,
-              }}
-              onMouseDown={(event) => startDrag(event, element)}
-              onContextMenu={(event) => onContextMenu(event, element.id)}
-            >
-              {element.type === 'text' ? (
-                <div
-                  className="h-full w-full overflow-hidden break-words text-white"
-                  style={{
-                    fontSize: element.fontSize ?? 42,
-                    fontWeight: element.fontWeight ?? 600,
-                    color: element.color ?? '#fff',
-                  }}
-                >
-                  {element.content}
-                </div>
-              ) : (
-                <img src={element.src} alt={element.alt ?? 'element'} className="h-full w-full object-cover" />
-              )}
-
-              <div
-                data-handle="resize"
-                className="absolute -bottom-1 -right-1 h-3 w-3 cursor-se-resize rounded-sm bg-white ring-1 ring-slate-800"
-                onMouseDown={(event) => startResize(event, element)}
-              />
-            </div>
-          ))}
+        {elements.map((element) => (
+          <CanvasElement
+            key={element.id}
+            element={element}
+            isSelected={selectedId === element.id}
+            onMouseDown={startDrag}
+            onContextMenu={onContextMenu}
+            onResizeMouseDown={startResize}
+          />
+        ))}
       </div>
 
       {contextMenu && (
