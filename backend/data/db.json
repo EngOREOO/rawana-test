@@ -3,8 +3,8 @@
     {
       "id": "u1",
       "name": "Designer Demo",
-      "email": "designer@example.com",
-      "password": "Password@123"
+      "email": "rawanakhalid64@gmail.com",
+      "password": "SecureP@ssw0rd123"
     }
   ],
   "slides": [
@@ -39,7 +39,25 @@
       "thumbnail": "https://picsum.photos/seed/slide2/640/360",
       "background": "https://picsum.photos/seed/bg2/1200/700",
       "html": "",
-      "elements": [],
+      "elements": [
+        {
+          "id": "GkcCQ3SkXIvXphYlm1YTs",
+          "x": 198,
+          "y": 152,
+          "width": 270,
+          "height": 204,
+          "zIndex": 2,
+          "content": "<p>type here</p>"
+        },
+        {
+          "id": "fkr79UJKfeYvi0ROFeIZp",
+          "x": 99,
+          "y": 100,
+          "width": 428,
+          "height": 254,
+          "zIndex": 2
+        }
+      ],
       "media": [
         {
           "id": "m-2",
@@ -50,7 +68,7 @@
         }
       ],
       "screenshot": null,
-      "updatedAt": "2026-03-06T00:00:00.000Z"
+      "updatedAt": "2026-03-06T21:29:12.820Z"
     }
   ]
 }

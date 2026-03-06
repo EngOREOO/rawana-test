@@ -26,8 +26,8 @@ const defaultDb = {
     {
       id: 'u1',
       name: 'Designer Demo',
-      email: 'designer@example.com',
-      password: 'Password@123',
+      email: 'rawanakhalid64@gmail.com',
+      password: 'SecureP@ssw0rd123',
     },
   ],
   slides: [
