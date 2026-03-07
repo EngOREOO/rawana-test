@@ -56,10 +56,17 @@ const slidesSlice = createSlice({
       })
       .addCase(fetchSlidesThunk.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.items = action.payload.items;
+        const localSlides = state.items.filter((slide) => slide.isLocal);
+        const merged = [...action.payload.items];
+        for (const localSlide of localSlides) {
+          if (!merged.some((item) => item.id === localSlide.id)) {
+            merged.push(localSlide);
+          }
+        }
+        state.items = merged.sort((a, b) => a.rank - b.rank);
         state.page = action.payload.page;
         state.totalPages = action.payload.totalPages;
-        state.totalCount = action.payload.totalCount;
+        state.totalCount = action.payload.totalCount + localSlides.length;
       })
       .addCase(fetchSlidesThunk.rejected, (state, action) => {
         state.status = 'failed';

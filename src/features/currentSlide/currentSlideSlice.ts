@@ -30,14 +30,23 @@ const initialState: CurrentSlideState = {
   lastScreenshot: null,
 };
 
+const isLocalSlideId = (slideId: string): boolean => slideId.startsWith('local-');
+
 export const fetchSlideByIdThunk = createAsyncThunk<SlideDetail, string, { state: RootState; rejectValue: string }>(
   'currentSlide/fetchById',
   async (id, { getState, rejectWithValue, dispatch }) => {
     try {
       const localSlide = getState().slides.items.find((slide) => slide.id === id && slide.isLocal);
-      if (localSlide) {
+      if (localSlide || isLocalSlideId(id)) {
         return {
-          ...localSlide,
+          ...(localSlide ?? {
+            id,
+            slideName: 'Local Slide',
+            type: 'presentation',
+            status: 'draft',
+            rank: 1,
+            isLocal: true,
+          }),
           elements: [],
         };
       }
@@ -52,6 +61,9 @@ export const fetchMultimediaThunk = createAsyncThunk<MediaItem[], { slideId: str
   'currentSlide/fetchMultimedia',
   async (payload, { rejectWithValue, dispatch }) => {
     try {
+      if (isLocalSlideId(payload.slideId)) {
+        return [];
+      }
       return await fetchMultimediaRequest(payload.slideId, payload.type);
     } catch (error) {
       return rejectWithValue(handleApiError(dispatch, error));
@@ -65,6 +77,9 @@ export const updateSlideElementThunk = createAsyncThunk<
   { rejectValue: string }
 >('currentSlide/updateElement', async (payload, { rejectWithValue, dispatch }) => {
   try {
+    if (isLocalSlideId(payload.slideId)) {
+      return { elementId: payload.elementId, updates: payload.updates };
+    }
     await updateSlideElementRequest(payload.slideId, payload.elementId, payload.updates);
     return { elementId: payload.elementId, updates: payload.updates };
   } catch (error) {
@@ -80,12 +95,14 @@ export const saveSlideLayoutThunk = createAsyncThunk<
   try {
     const state = getState();
     const elements = Object.values(state.elements.entities).filter(Boolean) as SlideElement[];
-    await saveSlideLayoutRequest({
-      slideId: payload.slideId,
-      html: payload.html,
-      screenshot: payload.screenshot,
-      elements,
-    });
+    if (!isLocalSlideId(payload.slideId)) {
+      await saveSlideLayoutRequest({
+        slideId: payload.slideId,
+        html: payload.html,
+        screenshot: payload.screenshot,
+        elements,
+      });
+    }
     console.log('Redux state snapshot on save:', state);
     dispatch(addToast({ type: 'success', message: 'Slide saved successfully' }));
     return { html: payload.html, screenshot: payload.screenshot };
@@ -102,6 +119,9 @@ export const syncSlideElementsThunk = createAsyncThunk<
   { state: RootState; rejectValue: string }
 >('currentSlide/syncElements', async ({ slideId }, { getState, rejectWithValue, dispatch }) => {
   try {
+    if (isLocalSlideId(slideId)) {
+      return;
+    }
     const state = getState();
     const elements = Object.values(state.elements.entities).filter(Boolean) as SlideElement[];
     await syncSlideElementsRequest(slideId, elements);

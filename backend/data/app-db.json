@@ -24,7 +24,8 @@
           "y": 346,
           "width": 220,
           "height": 80,
-          "zIndex": 1
+          "zIndex": 1,
+          "content": "اه"
         },
         {
           "id": "kMHu81yWK0cfF2Yp9_U2q",
@@ -53,7 +54,7 @@
         }
       ],
       "screenshot": null,
-      "updatedAt": "2026-03-07T01:06:10.254Z"
+      "updatedAt": "2026-03-07T01:57:20.518Z"
     },
     {
       "id": "37741911-f9bf-4dfa-8335-1e0b4c9793e3",
