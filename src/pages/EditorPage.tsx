@@ -1,7 +1,7 @@
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, DragEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { fetchSlidesThunk } from '../features/slides/slidesSlice';
+import { addLocalSlide, fetchSlidesThunk } from '../features/slides/slidesSlice';
 import {
   fetchMultimediaThunk,
   fetchSlideByIdThunk,
@@ -11,7 +11,6 @@ import {
 } from '../features/currentSlide/currentSlideSlice';
 import CanvasArea from '../components/editor/CanvasArea';
 import {
-  addImageElement,
   addTextElement,
   selectElement,
   updateElementLocal,
@@ -36,21 +35,34 @@ export default function EditorPage() {
   const [activeTab, setActiveTab] = useState<'text' | 'image'>('text');
   const [uploadedImages, setUploadedImages] = useState<Array<{ id: string; name: string; url: string }>>([]);
   const [selectedImageName, setSelectedImageName] = useState('');
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
 
   const imageLibrary = [
     ...uploadedImages,
     ...media.map((item) => ({ id: item.id, name: item.name, url: item.url })),
   ];
+  const isTextSelected = selectedElement?.type === 'text';
+  const isImageSelected = selectedElement?.type === 'image';
+
+  const isLocalSlide = slides.some((slideItem) => slideItem.id === id && slideItem.isLocal);
 
   useEffect(() => {
     if (!id) return;
     dispatch(fetchSlideByIdThunk(id));
-    dispatch(fetchMultimediaThunk({ slideId: id, type: 'image' }));
-  }, [dispatch, id]);
+    if (!isLocalSlide) {
+      dispatch(fetchMultimediaThunk({ slideId: id, type: 'image' }));
+    }
+  }, [dispatch, id, isLocalSlide]);
 
   useEffect(() => {
     dispatch(fetchSlidesThunk({ page: 1, name: rightSearch || undefined }));
   }, [dispatch, rightSearch]);
+
+  useEffect(() => {
+    if (selectedElement?.type === 'text') {
+      setActiveTab('text');
+    }
+  }, [selectedElement?.type]);
 
   const onSave = async () => {
     if (!canvasRef.current || !id) {
@@ -94,25 +106,65 @@ export default function EditorPage() {
   const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
-
     const next = files.map((file) => ({
       id: `upload-${crypto.randomUUID()}`,
       name: file.name,
       url: URL.createObjectURL(file),
     }));
     setUploadedImages((prev) => [...next, ...prev]);
+    setSelectedImageId(next[0]?.id ?? null);
     setSelectedImageName(next[0]?.name ?? '');
     event.target.value = '';
   };
 
-  const onAddImageToSlide = (url: string, name: string) => {
-    dispatch(addImageElement({ src: url }));
-    setSelectedImageName(name);
+  const onDropFiles = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const files = Array.from(event.dataTransfer.files ?? []).filter((file) => file.type.startsWith('image/'));
+    if (!files.length) return;
+    const next = files.map((file) => ({
+      id: `upload-${crypto.randomUUID()}`,
+      name: file.name,
+      url: URL.createObjectURL(file),
+    }));
+    setUploadedImages((prev) => [...next, ...prev]);
+    setSelectedImageId(next[0]?.id ?? null);
+    setSelectedImageName(next[0]?.name ?? '');
   };
 
-  const onUseAsBackground = (url: string, name: string) => {
-    dispatch(setSlideBackground(url));
-    setSelectedImageName(name);
+  const onSelectLibraryImage = (item: { id: string; name: string; url: string }) => {
+    setSelectedImageId(item.id);
+    setSelectedImageName(item.name);
+  };
+
+  const onAddImageToSlide = (item: { id: string; name: string; url: string }) => {
+    const exists = imageLibrary.some((entry) => entry.id === item.id);
+    if (!exists) {
+      setUploadedImages((prev) => [item, ...prev]);
+    }
+    onSelectLibraryImage(item);
+    const nextRank = slides.length ? Math.max(...slides.map((slideItem) => slideItem.rank)) + 1 : 1;
+    dispatch(
+      addLocalSlide({
+        id: `local-${crypto.randomUUID()}`,
+        slideName: item.name || `Slide ${nextRank}`,
+        type: 'presentation',
+        status: 'draft',
+        rank: nextRank,
+        thumbnail: item.url,
+        background: item.url,
+        html: '',
+        isLocal: true,
+      }),
+    );
+  };
+
+  const onUseAsBackground = (item: { id: string; name: string; url: string }) => {
+    const exists = imageLibrary.some((entry) => entry.id === item.id);
+    if (!exists) {
+      setUploadedImages((prev) => [item, ...prev]);
+    }
+    onSelectLibraryImage(item);
+    dispatch(setSlideBackground(item.url));
   };
 
   return (
@@ -169,11 +221,50 @@ export default function EditorPage() {
             <div className="mb-4 rounded-lg border border-slate-200 p-3">
               <h3 className="mb-2 text-sm font-semibold text-slate-700">Text Panel</h3>
               {selectedElement?.type === 'text' ? (
-                <textarea
-                  className="min-h-40 w-full rounded border border-slate-300 p-2 text-sm"
-                  value={selectedElement.content}
-                  onChange={(event) => onUpdateSelected({ content: event.target.value })}
-                />
+                <>
+                  <div className="mb-2 grid grid-cols-4 gap-1 rounded border border-slate-300 p-1">
+                    <button
+                      className={`rounded px-2 py-1 text-xs ${selectedElement.fontWeight === 700 ? 'bg-[#28335b] text-white' : 'bg-slate-200'}`}
+                      onClick={() => onUpdateSelected({ fontWeight: selectedElement.fontWeight === 700 ? 400 : 700 })}
+                    >
+                      B
+                    </button>
+                    <button
+                      className={`rounded px-2 py-1 text-xs ${selectedElement.fontStyle === 'italic' ? 'bg-[#28335b] text-white' : 'bg-slate-200'}`}
+                      onClick={() => onUpdateSelected({ fontStyle: selectedElement.fontStyle === 'italic' ? 'normal' : 'italic' })}
+                    >
+                      I
+                    </button>
+                    <button
+                      className={`rounded px-2 py-1 text-xs ${selectedElement.textDecoration === 'underline' ? 'bg-[#28335b] text-white' : 'bg-slate-200'}`}
+                      onClick={() => onUpdateSelected({ textDecoration: selectedElement.textDecoration === 'underline' ? 'none' : 'underline' })}
+                    >
+                      U
+                    </button>
+                    <input
+                      type="color"
+                      className="h-8 w-full rounded border border-slate-300"
+                      value={selectedElement.color ?? '#ffffff'}
+                      onChange={(event) => onUpdateSelected({ color: event.target.value })}
+                    />
+                  </div>
+                  <div className="mb-2 grid grid-cols-4 gap-1">
+                    <button className="rounded bg-slate-200 px-2 py-1 text-xs" onClick={() => onUpdateSelected({ textAlign: 'left' })}>Left</button>
+                    <button className="rounded bg-slate-200 px-2 py-1 text-xs" onClick={() => onUpdateSelected({ textAlign: 'center' })}>Center</button>
+                    <button className="rounded bg-slate-200 px-2 py-1 text-xs" onClick={() => onUpdateSelected({ textAlign: 'right' })}>Right</button>
+                    <input
+                      type="number"
+                      className="rounded border border-slate-300 px-2 py-1 text-xs"
+                      value={selectedElement.fontSize ?? 42}
+                      onChange={(event) => onUpdateSelected({ fontSize: Number(event.target.value) })}
+                    />
+                  </div>
+                  <textarea
+                    className="min-h-40 w-full rounded border border-slate-300 p-2 text-sm"
+                    value={selectedElement.content}
+                    onChange={(event) => onUpdateSelected({ content: event.target.value })}
+                  />
+                </>
               ) : (
                 <div className="min-h-20 rounded border border-slate-300 p-2 text-sm text-slate-500">
                   Select a text element
@@ -192,22 +283,42 @@ export default function EditorPage() {
               <p className="mb-2 text-xs font-semibold text-slate-600">
                 Selected: {selectedImageName || 'none'}
               </p>
-              <div className="grid max-h-64 grid-cols-2 gap-2 overflow-auto">
+              <div
+                className="grid max-h-64 grid-cols-2 gap-2 overflow-auto rounded-md border-2 border-dashed border-slate-300 p-2"
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={onDropFiles}
+              >
                 {imageLibrary.map((item) => (
-                  <div key={item.id} className="rounded border border-slate-200 p-1">
-                    <img src={item.url} alt={item.name} className="mb-1 h-20 w-full rounded object-cover" />
-                    <button
-                      className="mb-1 w-full rounded bg-[#28335b] px-2 py-1 text-xs font-semibold text-white"
-                      onClick={() => onAddImageToSlide(item.url, item.name)}
-                    >
-                      Add to slide
-                    </button>
-                    <button
-                      className="w-full rounded bg-slate-700 px-2 py-1 text-xs font-semibold text-white"
-                      onClick={() => onUseAsBackground(item.url, item.name)}
-                    >
-                      Use as background
-                    </button>
+                  <div
+                    key={item.id}
+                    className={`group relative overflow-hidden rounded border p-1 ${
+                      selectedImageId === item.id ? 'border-yellow-300 ring-2 ring-yellow-300' : 'border-slate-200'
+                    }`}
+                    onClick={() => onSelectLibraryImage(item)}
+                  >
+                    <img src={item.url} alt={item.name} className="h-24 w-full rounded object-cover" />
+                    <div className="pointer-events-none absolute inset-1 rounded bg-black/20" />
+                    <div className="absolute inset-1 flex flex-col items-center justify-center gap-2">
+                      <button
+                        className="pointer-events-auto rounded bg-[#28335b]/50 px-3 py-1 text-xs font-semibold text-white"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onAddImageToSlide(item);
+                        }}
+                      >
+                        Add to slide
+                      </button>
+                      <button
+                        className="pointer-events-auto rounded bg-slate-700/50 px-3 py-1 text-xs font-semibold text-white"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onUseAsBackground(item);
+                        }}
+                      >
+                        Use as background
+                      </button>
+                    </div>
+                    <p className="mt-1 truncate text-[11px] font-medium text-slate-600">{item.name}</p>
                   </div>
                 ))}
               </div>
@@ -216,7 +327,7 @@ export default function EditorPage() {
 
           <div className="rounded-lg border border-slate-200 p-3">
             <h3 className="mb-2 text-sm font-semibold text-slate-700">Element Properties</h3>
-            {selectedElement && activeTab === 'text' && selectedElement.type === 'text' ? (
+            {isTextSelected ? (
               <div className="space-y-2 text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <input
@@ -256,7 +367,7 @@ export default function EditorPage() {
                   onChange={(event) => onUpdateSelected({ content: event.target.value })}
                 />
               </div>
-            ) : selectedElement && activeTab === 'image' && selectedElement.type === 'image' ? (
+            ) : activeTab === 'image' && isImageSelected ? (
               <div className="space-y-2 text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <input

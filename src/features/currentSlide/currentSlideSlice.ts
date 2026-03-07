@@ -30,10 +30,17 @@ const initialState: CurrentSlideState = {
   lastScreenshot: null,
 };
 
-export const fetchSlideByIdThunk = createAsyncThunk<SlideDetail, string, { rejectValue: string }>(
+export const fetchSlideByIdThunk = createAsyncThunk<SlideDetail, string, { state: RootState; rejectValue: string }>(
   'currentSlide/fetchById',
-  async (id, { rejectWithValue, dispatch }) => {
+  async (id, { getState, rejectWithValue, dispatch }) => {
     try {
+      const localSlide = getState().slides.items.find((slide) => slide.id === id && slide.isLocal);
+      if (localSlide) {
+        return {
+          ...localSlide,
+          elements: [],
+        };
+      }
       return await fetchSlideByIdRequest(id);
     } catch (error) {
       return rejectWithValue(handleApiError(dispatch, error));
@@ -113,6 +120,11 @@ const currentSlideSlice = createSlice({
       state.status = 'idle';
       state.error = null;
     },
+    setSlideBackground: (state, action: { payload: string }) => {
+      if (state.slide) {
+        state.slide.background = action.payload;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -121,6 +133,7 @@ const currentSlideSlice = createSlice({
       })
       .addCase(fetchSlideByIdThunk.fulfilled, (state, action) => {
         state.slide = action.payload;
+        state.media = [];
         state.status = 'succeeded';
       })
       .addCase(fetchSlideByIdThunk.rejected, (state, action) => {
@@ -137,5 +150,5 @@ const currentSlideSlice = createSlice({
   },
 });
 
-export const { clearCurrentSlide } = currentSlideSlice.actions;
+export const { clearCurrentSlide, setSlideBackground } = currentSlideSlice.actions;
 export default currentSlideSlice.reducer;

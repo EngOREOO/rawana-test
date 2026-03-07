@@ -7,6 +7,7 @@ export interface Slide {
   thumbnail?: string;
   background?: string;
   html?: string;
+  isLocal?: boolean;
 }
 
 export interface MediaItem {
@@ -35,6 +36,9 @@ export interface TextElement extends BaseElement {
   color?: string;
   fontSize?: number;
   fontWeight?: number;
+  fontStyle?: 'normal' | 'italic';
+  textDecoration?: 'none' | 'underline';
+  textAlign?: 'left' | 'center' | 'right';
 }
 
 export interface ImageElement extends BaseElement {
