@@ -2,6 +2,7 @@ import { ChangeEvent, DragEvent, FormEvent, useEffect, useRef, useState } from '
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { addLocalSlide, fetchSlidesThunk } from '../features/slides/slidesSlice';
+import { logoutThunk } from '../features/auth/authSlice';
 import {
   fetchMultimediaThunk,
   fetchSlideByIdThunk,
@@ -172,6 +173,11 @@ export default function EditorPage() {
     dispatch(addTextElement());
   };
 
+  const onLogout = async () => {
+    await dispatch(logoutThunk());
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className="min-h-screen bg-slate-200">
       <header className="flex items-center justify-between bg-[#28335b] px-4 py-3 text-white">
@@ -192,6 +198,9 @@ export default function EditorPage() {
           <Link className="rounded-md bg-white px-4 py-2 text-sm text-[#28335b]" to="/">
             Back to Dashboard
           </Link>
+          <button className="rounded-md bg-[#dca126] px-4 py-2 text-sm text-white" onClick={onLogout}>
+            Logout
+          </button>
         </div>
       </header>
 

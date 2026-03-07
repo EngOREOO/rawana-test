@@ -2,8 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchSlidesThunk } from '../features/slides/slidesSlice';
-import { fetchUserDataThunk } from '../features/auth/authSlice';
-// import { logoutThunk } from '../features/auth/authSlice';
+import { fetchUserDataThunk, logoutThunk } from '../features/auth/authSlice';
 
 
 const EditIcon = () => (
@@ -41,6 +40,11 @@ export default function DashboardPage() {
     dispatch(fetchSlidesThunk({ page: nextPage, name: search.trim() || undefined }));
   };
 
+  const onLogout = async () => {
+    await dispatch(logoutThunk());
+    navigate('/login', { replace: true });
+  };
+
   const avatarLabel = (user?.name || user?.email || 'User').toString();
   const avatarInitial = avatarLabel.trim().charAt(0).toUpperCase() || 'U';
 
@@ -61,6 +65,12 @@ export default function DashboardPage() {
               <p className="text-sm font-semibold text-[#28335B]">{(user?.name || 'Designer').toString()}</p>
               <p className="text-xs text-slate-500">{(user?.email || '').toString()}</p>
             </div>
+            <button
+              onClick={onLogout}
+              className="rounded-full bg-[#28335B] px-3 py-1 text-xs font-semibold text-white hover:bg-[#1f2747]"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
