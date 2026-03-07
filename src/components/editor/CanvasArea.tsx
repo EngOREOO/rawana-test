@@ -43,6 +43,7 @@ interface CanvasElementProps {
   element: SlideElement;
   isSelected: boolean;
   onMouseDown: (event: MouseEvent<HTMLDivElement>, element: SlideElement) => void;
+  onClickSelect: (event: MouseEvent<HTMLDivElement>, elementId: string) => void;
   onContextMenu: (event: MouseEvent<HTMLDivElement>, elementId: string) => void;
   onResizeMouseDown: (event: MouseEvent<HTMLDivElement>, element: SlideElement) => void;
 }
@@ -51,6 +52,7 @@ const CanvasElement = memo(function CanvasElement({
   element,
   isSelected,
   onMouseDown,
+  onClickSelect,
   onContextMenu,
   onResizeMouseDown,
 }: CanvasElementProps) {
@@ -65,6 +67,7 @@ const CanvasElement = memo(function CanvasElement({
         zIndex: element.zIndex,
       }}
       onMouseDown={(event) => onMouseDown(event, element)}
+      onClick={(event) => onClickSelect(event, element.id)}
       onContextMenu={(event) => onContextMenu(event, element.id)}
     >
       {element.type === 'text' ? (
@@ -74,6 +77,9 @@ const CanvasElement = memo(function CanvasElement({
             fontSize: element.fontSize ?? 42,
             fontWeight: element.fontWeight ?? 600,
             color: element.color ?? '#fff',
+            fontStyle: element.fontStyle ?? 'normal',
+            textDecoration: element.textDecoration ?? 'none',
+            textAlign: element.textAlign ?? 'left',
           }}
         >
           {stripHtmlTags(element.content)}
@@ -192,6 +198,11 @@ export default function CanvasArea({ slideId, canvasRef }: Props) {
     dispatch(selectElement(elementId));
   };
 
+  const onClickSelect = (event: MouseEvent<HTMLDivElement>, elementId: string) => {
+    event.stopPropagation();
+    dispatch(selectElement(elementId));
+  };
+
   const onCopy = () => {
     if (!contextMenu) return;
     const element = elements.find((item) => item.id === contextMenu.elementId);
@@ -244,6 +255,7 @@ export default function CanvasArea({ slideId, canvasRef }: Props) {
             element={element}
             isSelected={selectedId === element.id}
             onMouseDown={startDrag}
+            onClickSelect={onClickSelect}
             onContextMenu={onContextMenu}
             onResizeMouseDown={startResize}
           />

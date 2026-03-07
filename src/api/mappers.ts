@@ -48,6 +48,9 @@ export const normalizeElement = (raw: unknown, index = 0): SlideElement => {
     color: asString(row.color, '') || undefined,
     fontSize: asNumber(row.fontSize, asNumber(row.font_size, 32)),
     fontWeight: asNumber(row.fontWeight, asNumber(row.font_weight, 600)),
+    fontStyle: asString(row.fontStyle, 'normal') as 'normal' | 'italic',
+    textDecoration: asString(row.textDecoration, 'none') as 'none' | 'underline',
+    textAlign: asString(row.textAlign, 'left') as 'left' | 'center' | 'right',
   };
 };
 

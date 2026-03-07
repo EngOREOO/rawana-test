@@ -27,6 +27,9 @@ const createDefaultTextElement = (): TextElement => ({
   color: '#ffffff',
   fontSize: 42,
   fontWeight: 600,
+  fontStyle: 'normal',
+  textDecoration: 'none',
+  textAlign: 'left',
 });
 
 const createDefaultImageElement = (src: string): ImageElement => ({

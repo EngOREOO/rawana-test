@@ -43,6 +43,10 @@ const slidesSlice = createSlice({
     setSlideSearch: (state, action) => {
       state.search = action.payload;
     },
+    addLocalSlide: (state, action: { payload: Slide }) => {
+      state.items = [...state.items, action.payload].sort((a, b) => a.rank - b.rank);
+      state.totalCount += 1;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -64,5 +68,5 @@ const slidesSlice = createSlice({
   },
 });
 
-export const { setSlideSearch } = slidesSlice.actions;
+export const { setSlideSearch, addLocalSlide } = slidesSlice.actions;
 export default slidesSlice.reducer;

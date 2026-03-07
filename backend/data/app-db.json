@@ -17,7 +17,32 @@
       "thumbnail": "https://picsum.photos/seed/slide1/640/360",
       "background": "https://picsum.photos/seed/bg1/1200/700",
       "html": "",
-      "elements": [],
+      "elements": [
+        {
+          "id": "LJCIE4LViK9Ec7Ki4ZWRQ",
+          "x": 170,
+          "y": 346,
+          "width": 220,
+          "height": 80,
+          "zIndex": 1
+        },
+        {
+          "id": "kMHu81yWK0cfF2Yp9_U2q",
+          "x": 346,
+          "y": 165,
+          "width": 280,
+          "height": 180,
+          "zIndex": 2
+        },
+        {
+          "id": "DmSUr1kO1ypOfEkFQu1ul",
+          "x": 606,
+          "y": 242,
+          "width": 280,
+          "height": 180,
+          "zIndex": 2
+        }
+      ],
       "media": [
         {
           "id": "ea9be908-media-1",
@@ -28,7 +53,7 @@
         }
       ],
       "screenshot": null,
-      "updatedAt": "2026-03-06T05:30:31.808Z"
+      "updatedAt": "2026-03-07T01:06:10.254Z"
     },
     {
       "id": "37741911-f9bf-4dfa-8335-1e0b4c9793e3",
