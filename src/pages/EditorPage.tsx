@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchSlidesThunk } from '../features/slides/slidesSlice';
@@ -6,6 +6,7 @@ import {
   fetchMultimediaThunk,
   fetchSlideByIdThunk,
   saveSlideLayoutThunk,
+  setSlideBackground,
   updateSlideElementThunk,
 } from '../features/currentSlide/currentSlideSlice';
 import CanvasArea from '../components/editor/CanvasArea';
@@ -25,12 +26,21 @@ export default function EditorPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const slide = useAppSelector((state) => state.currentSlide.slide);
   const media = useAppSelector((state) => state.currentSlide.media);
   const slides = useAppSelector((state) => state.slides.items);
   const selectedElement = useAppSelector(selectSelectedElement);
   const [rightSearch, setRightSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'text' | 'image'>('text');
+  const [uploadedImages, setUploadedImages] = useState<Array<{ id: string; name: string; url: string }>>([]);
+  const [selectedImageName, setSelectedImageName] = useState('');
+
+  const imageLibrary = [
+    ...uploadedImages,
+    ...media.map((item) => ({ id: item.id, name: item.name, url: item.url })),
+  ];
 
   useEffect(() => {
     if (!id) return;
@@ -77,6 +87,34 @@ export default function EditorPage() {
     dispatch(fetchSlidesThunk({ page: 1, name: rightSearch.trim() || undefined }));
   };
 
+  const onChooseFile = () => {
+    fileInputRef.current?.click();
+  };
+
+  const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+
+    const next = files.map((file) => ({
+      id: `upload-${crypto.randomUUID()}`,
+      name: file.name,
+      url: URL.createObjectURL(file),
+    }));
+    setUploadedImages((prev) => [...next, ...prev]);
+    setSelectedImageName(next[0]?.name ?? '');
+    event.target.value = '';
+  };
+
+  const onAddImageToSlide = (url: string, name: string) => {
+    dispatch(addImageElement({ src: url }));
+    setSelectedImageName(name);
+  };
+
+  const onUseAsBackground = (url: string, name: string) => {
+    dispatch(setSlideBackground(url));
+    setSelectedImageName(name);
+  };
+
   return (
     <div className="min-h-screen bg-slate-200">
       <header className="flex items-center justify-between bg-[#28335b] px-4 py-3 text-white">
@@ -84,6 +122,9 @@ export default function EditorPage() {
           <p className="text-sm uppercase tracking-wide">Slide Editor</p>
           <h1 className="text-lg font-semibold">{slide?.slideName ?? 'Loading...'}</h1>
         </div>
+        <p className="text-xl font-semibold tracking-wide">
+          __{selectedImageName || slide?.slideName || 'slide_name_goes_here'}
+        </p>
         <div className="flex items-center gap-2">
           <button
             className="rounded-md border border-white/30 px-4 py-2 text-sm hover:bg-white/10"
@@ -107,50 +148,75 @@ export default function EditorPage() {
             >
               Add Text
             </button>
+          </div>
+
+          <div className="mb-4 grid grid-cols-2 gap-2">
             <button
-              className="rounded-md bg-slate-300 px-3 py-2 text-sm"
-              onClick={() => {
-                const first = media[0];
-                if (first) dispatch(addImageElement({ src: first.url }));
-              }}
+              className={`rounded-md px-3 py-2 text-sm font-semibold ${activeTab === 'text' ? 'bg-[#28335b] text-white' : 'bg-slate-200 text-slate-700'}`}
+              onClick={() => setActiveTab('text')}
             >
-              Add Image
+              Text
+            </button>
+            <button
+              className={`rounded-md px-3 py-2 text-sm font-semibold ${activeTab === 'image' ? 'bg-[#7ba3d9] text-white' : 'bg-slate-200 text-slate-700'}`}
+              onClick={() => setActiveTab('image')}
+            >
+              Image
             </button>
           </div>
 
-          <div className="mb-4 rounded-lg border border-slate-200 p-3">
-            <h3 className="mb-2 text-sm font-semibold text-slate-700">Text Panel (Rich Text)</h3>
-            {selectedElement?.type === 'text' ? (
-              <textarea
-                className="min-h-40 w-full rounded border border-slate-300 p-2 text-sm"
-                value={selectedElement.content}
-                onChange={(event) => onUpdateSelected({ content: event.target.value })}
-              />
-            ) : (
-              <div className="min-h-20 rounded border border-slate-300 p-2 text-sm text-slate-500">
-                Select a text element
-              </div>
-            )}
-          </div>
-
-          <div className="mb-4 rounded-lg border border-slate-200 p-3">
-            <h3 className="mb-2 text-sm font-semibold text-slate-700">Image Panel</h3>
-            <div className="grid max-h-40 grid-cols-2 gap-2 overflow-auto">
-              {media.map((item) => (
-                <button
-                  key={item.id}
-                  className="overflow-hidden rounded border border-slate-200"
-                  onClick={() => dispatch(addImageElement({ src: item.url }))}
-                >
-                  <img src={item.url} alt={item.name} className="h-16 w-full object-cover" />
-                </button>
-              ))}
+          {activeTab === 'text' && (
+            <div className="mb-4 rounded-lg border border-slate-200 p-3">
+              <h3 className="mb-2 text-sm font-semibold text-slate-700">Text Panel</h3>
+              {selectedElement?.type === 'text' ? (
+                <textarea
+                  className="min-h-40 w-full rounded border border-slate-300 p-2 text-sm"
+                  value={selectedElement.content}
+                  onChange={(event) => onUpdateSelected({ content: event.target.value })}
+                />
+              ) : (
+                <div className="min-h-20 rounded border border-slate-300 p-2 text-sm text-slate-500">
+                  Select a text element
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          {activeTab === 'image' && (
+            <div className="mb-4 rounded-lg border border-slate-200 p-3">
+              <h3 className="mb-2 text-sm font-semibold text-slate-700">Image Panel</h3>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+              <button className="mb-3 w-full rounded-md bg-[#28335b] px-3 py-2 text-sm font-semibold text-white" onClick={onChooseFile}>
+                Choose File
+              </button>
+              <p className="mb-2 text-xs font-semibold text-slate-600">
+                Selected: {selectedImageName || 'none'}
+              </p>
+              <div className="grid max-h-64 grid-cols-2 gap-2 overflow-auto">
+                {imageLibrary.map((item) => (
+                  <div key={item.id} className="rounded border border-slate-200 p-1">
+                    <img src={item.url} alt={item.name} className="mb-1 h-20 w-full rounded object-cover" />
+                    <button
+                      className="mb-1 w-full rounded bg-[#28335b] px-2 py-1 text-xs font-semibold text-white"
+                      onClick={() => onAddImageToSlide(item.url, item.name)}
+                    >
+                      Add to slide
+                    </button>
+                    <button
+                      className="w-full rounded bg-slate-700 px-2 py-1 text-xs font-semibold text-white"
+                      onClick={() => onUseAsBackground(item.url, item.name)}
+                    >
+                      Use as background
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="rounded-lg border border-slate-200 p-3">
             <h3 className="mb-2 text-sm font-semibold text-slate-700">Element Properties</h3>
-            {selectedElement ? (
+            {selectedElement && activeTab === 'text' && selectedElement.type === 'text' ? (
               <div className="space-y-2 text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <input
@@ -184,16 +250,53 @@ export default function EditorPage() {
                   type="number"
                   onChange={(event) => onUpdateSelected({ zIndex: Number(event.target.value) })}
                 />
-                {selectedElement.type === 'text' && (
-                  <textarea
-                    className="w-full rounded border border-slate-300 px-2 py-1"
-                    value={selectedElement.content}
-                    onChange={(event) => onUpdateSelected({ content: event.target.value })}
+                <textarea
+                  className="w-full rounded border border-slate-300 px-2 py-1"
+                  value={selectedElement.content}
+                  onChange={(event) => onUpdateSelected({ content: event.target.value })}
+                />
+              </div>
+            ) : selectedElement && activeTab === 'image' && selectedElement.type === 'image' ? (
+              <div className="space-y-2 text-sm">
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    className="rounded border border-slate-300 px-2 py-1"
+                    value={selectedElement.x}
+                    type="number"
+                    onChange={(event) => onUpdateSelected({ x: Number(event.target.value) })}
                   />
-                )}
+                  <input
+                    className="rounded border border-slate-300 px-2 py-1"
+                    value={selectedElement.y}
+                    type="number"
+                    onChange={(event) => onUpdateSelected({ y: Number(event.target.value) })}
+                  />
+                  <input
+                    className="rounded border border-slate-300 px-2 py-1"
+                    value={selectedElement.width}
+                    type="number"
+                    onChange={(event) => onUpdateSelected({ width: Number(event.target.value) })}
+                  />
+                  <input
+                    className="rounded border border-slate-300 px-2 py-1"
+                    value={selectedElement.height}
+                    type="number"
+                    onChange={(event) => onUpdateSelected({ height: Number(event.target.value) })}
+                  />
+                </div>
+                <input
+                  className="w-full rounded border border-slate-300 px-2 py-1"
+                  value={selectedElement.zIndex}
+                  type="number"
+                  onChange={(event) => onUpdateSelected({ zIndex: Number(event.target.value) })}
+                />
               </div>
             ) : (
-              <p className="text-sm text-slate-500">Select an element to edit properties.</p>
+              <p className="text-sm text-slate-500">
+                {activeTab === 'text'
+                  ? 'Select a text element to edit text controls.'
+                  : 'Select an image element to edit image controls.'}
+              </p>
             )}
           </div>
         </aside>
