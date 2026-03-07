@@ -85,7 +85,7 @@ const CanvasElement = memo(function CanvasElement({
           {stripHtmlTags(element.content)}
         </div>
       ) : (
-        <img src={element.src} alt={element.alt ?? 'element'} className="h-full w-full object-cover" />
+        <img src={element.src} alt={element.alt ?? 'element'} className="h-full w-full object-cover" crossOrigin="anonymous" />
       )}
 
       <div
@@ -244,7 +244,7 @@ export default function CanvasArea({ slideId, canvasRef }: Props) {
         onClick={() => dispatch(selectElement(null))}
       >
         {slide?.background ? (
-          <img src={slide.background} alt={slide.slideName} className="h-full w-full object-cover" />
+          <img src={slide.background} alt={slide.slideName} className="h-full w-full object-cover" crossOrigin="anonymous" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#0f2b56] via-[#1b4d96] to-[#12355e]" />
         )}
