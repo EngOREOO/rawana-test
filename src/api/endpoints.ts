@@ -1,5 +1,6 @@
 export const API_ENDPOINTS = {
   login: '/api/login',
+  resetPassword: '/api/reset-password',
   logout: '/api/logout',
   userData: '/api/user-data',
   slidesOfDesigner: '/api/slides-of-designer',

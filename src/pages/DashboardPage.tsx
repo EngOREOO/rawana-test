@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { fetchSlidesThunk } from '../features/slides/slidesSlice';
+import { fetchUserDataThunk } from '../features/auth/authSlice';
 // import { logoutThunk } from '../features/auth/authSlice';
 
 
@@ -17,11 +18,19 @@ export default function DashboardPage() {
   const navigate = useNavigate();
 
   const { items, page, totalPages, status } = useAppSelector((state) => state.slides);
+  const user = useAppSelector((state) => state.auth.user);
+  const token = useAppSelector((state) => state.auth.token);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     dispatch(fetchSlidesThunk({ page: 1 }));
   }, [dispatch]);
+
+  useEffect(() => {
+    if (token && !user) {
+      dispatch(fetchUserDataThunk());
+    }
+  }, [dispatch, token, user]);
 
   const onSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -32,10 +41,28 @@ export default function DashboardPage() {
     dispatch(fetchSlidesThunk({ page: nextPage, name: search.trim() || undefined }));
   };
 
+  const avatarLabel = (user?.name || user?.email || 'User').toString();
+  const avatarInitial = avatarLabel.trim().charAt(0).toUpperCase() || 'U';
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-8">
       <div className="mx-auto max-w-7xl">
-        <h1 className="text-[32px] font-bold text-[#28335B] mb-8">Slides</h1>
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-[32px] font-bold text-[#28335B]">Slides</h1>
+          <div className="flex items-center gap-3 rounded-full bg-white px-2 py-1 shadow-sm">
+            {user?.avatar ? (
+              <img src={user.avatar} alt={avatarLabel} className="h-10 w-10 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#28335B] text-sm font-bold text-white">
+                {avatarInitial}
+              </div>
+            )}
+            <div className="pr-2">
+              <p className="text-sm font-semibold text-[#28335B]">{(user?.name || 'Designer').toString()}</p>
+              <p className="text-xs text-slate-500">{(user?.email || '').toString()}</p>
+            </div>
+          </div>
+        </div>
 
       
         <form onSubmit={onSearch} className="mb-10 rounded-2xl bg-[#F2F2F2] p-10 flex gap-6 items-center">

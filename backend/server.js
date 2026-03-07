@@ -190,7 +190,12 @@ app.post('/api/login', upload.none(), (req, res) => {
   }
 
   const token = crypto.randomBytes(24).toString('hex');
-  const authUser = { id: user.id, name: user.name, email: user.email };
+  const authUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.email)}&background=28335B&color=ffffff`,
+  };
   sessions.set(token, authUser);
 
   return res.json({ token, user: authUser });
@@ -199,6 +204,29 @@ app.post('/api/login', upload.none(), (req, res) => {
 app.post('/api/logout', requireAuth, (req, res) => {
   sessions.delete(req.token);
   res.json({ message: 'Logged out' });
+});
+
+app.post('/api/reset-password', (req, res) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
+
+  if (!email) {
+    return res.status(422).json({ message: 'Email is required' });
+  }
+  if (!password) {
+    return res.status(422).json({ message: 'Password is required' });
+  }
+
+  const db = readDb();
+  const user = db.users.find((row) => row.email.toLowerCase() === email);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  user.password = password;
+  writeDb(db);
+
+  return res.json({ message: 'Password updated successfully' });
 });
 
 app.get('/api/user-data', requireAuth, (req, res) => {

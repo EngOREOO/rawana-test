@@ -167,6 +167,11 @@ export default function EditorPage() {
     dispatch(setSlideBackground(item.url));
   };
 
+  const onClickTextTab = () => {
+    setActiveTab('text');
+    dispatch(addTextElement());
+  };
+
   return (
     <div className="min-h-screen bg-slate-200">
       <header className="flex items-center justify-between bg-[#28335b] px-4 py-3 text-white">
@@ -193,19 +198,11 @@ export default function EditorPage() {
       <div className="grid min-h-[calc(100vh-72px)] grid-cols-[300px_1fr_320px] gap-0">
         <aside className="border-r border-slate-300 bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold text-slate-800">Add Elements</h2>
-          <div className="mb-4 flex gap-2">
-            <button
-              className="rounded-md bg-[#7ba3d9] px-3 py-2 text-sm font-medium text-white"
-              onClick={() => dispatch(addTextElement())}
-            >
-              Add Text
-            </button>
-          </div>
 
           <div className="mb-4 grid grid-cols-2 gap-2">
             <button
               className={`rounded-md px-3 py-2 text-sm font-semibold ${activeTab === 'text' ? 'bg-[#28335b] text-white' : 'bg-slate-200 text-slate-700'}`}
-              onClick={() => setActiveTab('text')}
+              onClick={onClickTextTab}
             >
               Text
             </button>

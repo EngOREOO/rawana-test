@@ -29,8 +29,23 @@ export const loginRequest = async (email: string, password: string) => {
   }
 };
 
+export const resetPasswordRequest = async (email: string, password: string) => {
+  const response = await apiClient.post(
+    API_ENDPOINTS.resetPassword,
+    { email, password },
+    { headers: { 'Content-Type': 'application/json' } },
+  );
+  return response.data;
+};
+
 export const logoutRequest = async () => {
   await apiClient.post(API_ENDPOINTS.logout);
+};
+
+export const fetchUserDataRequest = async () => {
+  const response = await apiClient.get(API_ENDPOINTS.userData);
+  const data = response.data;
+  return (data?.data ?? data?.user ?? data) as Record<string, unknown>;
 };
 
 export const fetchSlidesRequest = async (params: { page?: number; name?: string; perPage?: number }): Promise<SlidesResponse> => {
