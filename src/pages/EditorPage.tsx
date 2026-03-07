@@ -37,6 +37,9 @@ export default function EditorPage() {
   const [uploadedImages, setUploadedImages] = useState<Array<{ id: string; name: string; url: string }>>([]);
   const [selectedImageName, setSelectedImageName] = useState('');
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const [showSavePreview, setShowSavePreview] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const [savedPreviewBySlideId, setSavedPreviewBySlideId] = useState<Record<string, string>>({});
 
   const imageLibrary = [
     ...uploadedImages,
@@ -72,14 +75,21 @@ export default function EditorPage() {
 
     const html = serializeCanvasHtml(canvasRef.current);
     const screenshot = await captureNodeScreenshot(canvasRef.current);
-
-    await dispatch(
+    const result = await dispatch(
       saveSlideLayoutThunk({
         slideId: id,
         html,
         screenshot,
       }),
     );
+    if (saveSlideLayoutThunk.fulfilled.match(result)) {
+      if (screenshot) {
+        setSavedPreviewBySlideId((prev) => ({ ...prev, [id]: screenshot }));
+      }
+      const index = slides.findIndex((slideItem) => slideItem.id === id);
+      setPreviewIndex(index >= 0 ? index : 0);
+      setShowSavePreview(true);
+    }
   };
 
   const onUpdateSelected = (changes: Partial<SlideElement>) => {
@@ -177,6 +187,13 @@ export default function EditorPage() {
     await dispatch(logoutThunk());
     navigate('/login', { replace: true });
   };
+
+  const previewSlides = slides.map((slideItem) => ({
+    ...slideItem,
+    preview: savedPreviewBySlideId[slideItem.id] || slideItem.thumbnail || slideItem.background || '',
+  }));
+
+  const activePreview = previewSlides[previewIndex] ?? null;
 
   return (
     <div className="min-h-screen bg-slate-200">
@@ -458,6 +475,52 @@ export default function EditorPage() {
           </div>
         </aside>
       </div>
+
+      {showSavePreview && activePreview && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 backdrop-blur-lg">
+          <div className="relative w-[min(92vw,620px)] rounded-3xl bg-white p-6 shadow-2xl">
+            <button
+              className="absolute right-4 top-4 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700"
+              onClick={() => setShowSavePreview(false)}
+            >
+              Close
+            </button>
+            <h3 className="mb-4 text-center text-4xl font-bold text-[#28335b]">Preview screenshot...</h3>
+            <div className="relative mx-auto w-full max-w-[520px]">
+              {activePreview.preview ? (
+                <img
+                  src={activePreview.preview}
+                  alt={activePreview.slideName}
+                  className="h-[420px] w-full rounded-xl object-cover"
+                />
+              ) : (
+                <div className="flex h-[420px] w-full items-center justify-center rounded-xl bg-slate-200 text-slate-500">
+                  No preview available
+                </div>
+              )}
+              <p className="mt-3 text-center text-sm font-semibold text-slate-700">
+                {activePreview.rank}. {activePreview.slideName}
+              </p>
+              {previewSlides.length > 1 && (
+                <>
+                  <button
+                    className="absolute left-3 top-1/2 h-12 w-12 -translate-y-1/2 rounded-full bg-[#28335b]/80 text-3xl text-white"
+                    onClick={() => setPreviewIndex((prev) => (prev - 1 + previewSlides.length) % previewSlides.length)}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="absolute right-3 top-1/2 h-12 w-12 -translate-y-1/2 rounded-full bg-[#28335b]/80 text-3xl text-white"
+                    onClick={() => setPreviewIndex((prev) => (prev + 1) % previewSlides.length)}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
